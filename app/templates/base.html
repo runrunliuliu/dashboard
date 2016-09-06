@@ -1,6 +1,5 @@
 {% extends "bootstrap/base.html" %}
 
-
 {% block html_attribs %} lang="en"{% endblock %}
 
 
@@ -8,6 +7,7 @@
 
 
 {% block styles %}
+
     <!-- Favicon.ico -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
@@ -165,56 +165,25 @@
                         </div>
                     </form>
                 </li>
-
                 <li>
-                    <a href="{{ url_for('main.index') }}"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                    <a href="{{ url_for('main.tbuy') }}"><i class="fa fa-bullseye fa-fw"></i>今日选股</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('main.tholds') }}"><i class="fa fa-bullseye fa-fw"></i>当前持仓</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('main.tfinish') }}"><i class="fa fa-bullseye fa-fw"></i>历史交易</a>
+                </li>
+                 <li>
+                    <a href="{{ url_for('main.tdrops') }}"><i class="fa fa-bullseye fa-fw"></i>弃股池</a>
                 </li>
 
                 <li>
-                    <a href="#"><i class="fa fa-cubes fa-fw"></i> Relationships<span class="fa arrow"></span></a>
-                    <ul class="nav nav-second-level">
-                        <li>
-                            <a href="{{ url_for('main.companies', username = current_user.username) }}"><i class="fa fa-lightbulb-o fa-fw"></i> Startup Companies</a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('main.firms', username = current_user.username, firm_type_code = 'vc') }}"><i class="fa fa-university fa-fw"></i> Venture Capital Firms</a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('main.firms', username = current_user.username, firm_type_code = 'ai') }}"><i class="fa fa-rocket fa-fw"></i> Acclerators and Incubators</a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('main.firms', username = current_user.username, firm_type_code = 'su') }}"><i class="fa fa-building-o fa-fw"></i> Startup Organizations</a>
-                        </li>
-                    </ul>
-                    <!-- /.nav-second-level -->
+                    <a href="{{ url_for('main.stocks') }}"><i class="fa fa-bullseye fa-fw"></i>统计分析</a>
                 </li>
-
                 <li>
-                    <a href="#"><i class="fa fa-files-o fa-fw"></i> Reports<span class="fa arrow"></span></a>
-                    <ul class="nav nav-second-level">
-                        <li>
-                            <a href="#"><i class="fa fa-file-o fa-fw"></i> Report 1</a>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-file-o fa-fw"></i> Report 2</a>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-file-o fa-fw"></i> Report 3</a>
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-file-o fa-fw"></i> Report 4</a>
-                        </li>
-                    </ul>
+                    <a href="{{ url_for('main.stocks') }}"><i class="fa fa-bullseye fa-fw"></i>Stocks</a>
                 </li>
-
-                <li>
-                <a href="{{ url_for('main.users', username = current_user.username) }}"><i class="fa fa-users fa-fw"></i> Users</a>
-                </li>
-
-                <li>
-                    <a href="#"><i class="fa fa-bullseye fa-fw"></i> Goals</a>
-                </li>
-
             </ul>
         </div>
         <!-- /.sidebar-collapse -->

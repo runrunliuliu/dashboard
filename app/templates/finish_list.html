@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Insights - Users{% endblock %}
+
+{% block wrapper %}
+
+    <!-- page header -->
+    <div class="page-header">
+        <h1>交易列表</h1>
+    </div>
+    <!-- end page header -->
+
+    <!-- table list -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-users fa-lg"></i> Users
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>StockID</th>
+                                    <th>StockName</th>
+                                    <th>Strategy</th>
+                                    <th>Reason</th>
+                                    <th>BPrice</th>
+                                    <th>SPrice</th>
+                                    <th>NPrice</th>
+                                    <th>Returns</th>
+                                    <th>BuyDay</th>
+                                    <th>SellDay</th>
+                                    <th>Holds</th>
+                                    <th>BuySlip</th>
+                                    <th>SellSlip</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for u in holds %}
+                            <tr align="center">
+                                <td>
+                                    {{loop.index}}
+                                </td>
+                                <td>
+                                    {{u.hold.stockid}}
+                                </td>
+                                <td>
+                                    {{u.hold.stockname}}
+                                </td>
+                                <td>
+                                    {{u.hold.strategyid}}
+                                </td>
+                                <td>
+                                    {{u.hold.reason}}
+                                </td>
+                                <td>
+                                    {{u.hold.bprice}}
+                                </td>
+                                <td>
+                                    {{u.hold.sprice}}
+                                </td>
+                                <td>
+                                    {{u.hold.nprice}}
+                                </td>
+                                {% if u.ret >= 0 %} 
+                                    <td class='success'>{{u.ret}}%</td>
+                                {% elif u.ret < 0 %} 
+                                    <td class='error'>{{u.ret}}%</td>
+                                {% endif %}
+                                <td>
+                                    {{u.hold.buyday}}
+                                </td>
+                                <td>
+                                    {{u.hold.sellday}}
+                                </td>
+                                <td>
+                                    {{u.hold.holds}}
+                                </td>
+                                {% if u.bslip <= 0 %} 
+                                    <td class='success'>{{u.bslip}}%</td>
+                                {% elif u.bslip > 0 %} 
+                                    <td class='error'>{{u.bslip}}%</td>
+                                {% endif %}
+                                {% if u.sslip >= 0 %} 
+                                    <td class='success'>{{u.sslip}}%</td>
+                                {% elif u.sslip < 0 %} 
+                                    <td class='error'>{{u.sslip}}%</td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.table-responsive -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- end table list -->
+
+{% endblock wrapper %}

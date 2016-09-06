@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Insights - Users{% endblock %}
+
+{% block wrapper %}
+
+    <!-- page header -->
+    <div class="page-header">
+        <h1>股票列表</h1>
+    </div>
+    <!-- end page header -->
+
+    <!-- table list -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-users fa-lg"></i> Users
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>StockID</th>
+                                    <th>StockName</th>
+                                    <th>HangYe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for u in stocks %}
+                            <tr>
+                                <td>
+                                    {{ loop.index }}
+                                </td>
+                                <td>
+                                    {{ u.stock.stockid }}
+                                </td>
+                                <td>
+                                    {{ u.stock.stockname }}
+                                </td>
+                                <td>
+                                    {{ u.stock.hangye }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.table-responsive -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- end table list -->
+
+{% endblock wrapper %}
