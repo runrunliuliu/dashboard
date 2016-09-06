@@ -2,24 +2,28 @@ from flask import render_template, redirect, url_for, flash, request, abort, \
     current_app, jsonify
 from flask_login import current_user, login_required
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm, PostForm
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm, \
+    EditHoldsForm, EditDropsForm, EditStopWinForm
 from .. import db
 from ..models import Permission, Role, User, Post, Firm, Company, FirmTier, \
-    FirmType, Follow, Geo, UserType
+    FirmType, Follow, Geo, UserType, Stock, Tbuy, Holds
 from ..decorators import admin_required, permission_required
+import datetime
+import json
 
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    if current_user.is_anonymous():
+    if current_user.is_anonymous:
         return redirect(url_for('auth.login'))
     else:
         top_vc_firms = current_user.top_firms(n=10, firm_type_code='vc')
         top_ai_firms = current_user.top_firms(n=10, firm_type_code='ai')
         top_su_firms = current_user.top_firms(n=10, firm_type_code='su')
-        return render_template('index.html', top_vc_firms=top_vc_firms,
-                               top_ai_firms=top_ai_firms,
-                               top_su_firms=top_su_firms)
+        # return render_template('index.html', top_vc_firms=top_vc_firms,
+        #                        top_ai_firms=top_ai_firms,
+        #                        top_su_firms=top_su_firms)
+        return redirect(url_for('main.tbuy'))
 
 
 @main.route('/user/<username>')
@@ -49,6 +53,151 @@ def user(username):
 
     return render_template('user.html', user=user, vc_firms=vc_firms,
                            ai_firms=ai_firms, su_firms=su_firms)
+
+@main.route('/stocks')
+@login_required
+def stocks():
+    results = Stock.query.order_by(Stock.stockid.asc()).all()
+    stocks  = [{'stock': item, 'timestamp': None}
+                 for item in results]
+    return render_template('stock_list.html', stocks=stocks)
+
+@main.route('/tdrops')
+@login_required
+def tdrops():
+    filters = Holds.query.filter(Holds.status == 2)
+    results = filters.join(Stock, Stock.stockid == Holds.stockid) \
+                .add_columns(
+                    Holds.stockid,
+                    Stock.stockname,
+                    Holds.strategyid,
+                    Holds.reason,
+                    Holds.dreason,
+                    Holds.sigday,
+                    Holds.sellday,
+                    Holds.bprice,
+                    Holds.nprice,
+                    Holds.sprice,
+                    Holds.holds,) \
+                .order_by(Holds.strategyid.asc(), Holds.id.asc()).all()
+    drops    = [
+                {
+                    'drop': item,
+                    'timestamp': None
+                }
+                for item in results
+              ]
+    return render_template('drops_list.html', drops=drops)
+
+@main.route('/gholds')
+def gholds():
+    celue   = request.args.get('cl')
+    filters = Holds.query.filter(Holds.status == 1).all()
+    res = {}
+    stocks = []
+    for item in filters:
+        stocks.append(item.stockid)
+
+    res['cl']     = celue
+    res['stocks'] = stocks
+
+    return json.dumps(res)
+
+@main.route('/tholds')
+@login_required
+def tholds():
+    celue = request.args.get('cl')
+    if celue is not None:
+        filters = Holds.query.filter(Holds.status == 1)
+        filters = filters.filter(Holds.strategyid == celue)
+    else:
+        filters = Holds.query.filter(Holds.status == 1)
+
+    results = filters.join(Stock, Stock.stockid == Holds.stockid) \
+                .add_columns(
+                    Holds.id,
+                    Holds.stockid,
+                    Stock.stockname,
+                    Holds.strategyid,
+                    Holds.reason,
+                    Holds.dreason,
+                    Holds.buyday,
+                    Holds.sellday,
+                    Holds.bprice,
+                    Holds.nprice,
+                    Holds.sprice,
+                    Holds.holds,) \
+                .order_by(Holds.strategyid.asc(), Holds.id.asc()).all()
+    holds    = [
+                {
+                    'hold': item,
+                    'ret': float('{0:.4f}'.format((item.nprice - item.bprice) / item.bprice * 100)),
+                    'timestamp': None
+                }
+                for item in results
+              ]
+    return render_template('holds_list.html', holds=holds)
+
+@main.route('/tfinish')
+@login_required
+def tfinish():
+    filters = Holds.query.filter(Holds.status == 3)
+    results = filters.join(Stock, Stock.stockid == Holds.stockid) \
+                .add_columns(
+                    Holds.id,
+                    Holds.stockid,
+                    Stock.stockname,
+                    Holds.strategyid,
+                    Holds.reason,
+                    Holds.buyday,
+                    Holds.sellday,
+                    Holds.bprice,
+                    Holds.nprice,
+                    Holds.sprice,
+                    Holds.oprice,
+                    Holds.holds,) \
+                .order_by(Holds.strategyid.asc(), Holds.id.asc()).all()
+    holds    = [
+                {
+                    'hold': item,
+                    'ret': float('{0:.2f}'.format((item.sprice - item.bprice) / item.bprice * 100)),
+                    'bslip': float('{0:.2f}'.format((item.bprice - item.oprice) / item.oprice * 100)),
+                    'sslip': float('{0:.2f}'.format((item.sprice - item.nprice) / item.bprice * 100)),
+                    'timestamp': None
+                }
+                for item in results
+              ]
+    return render_template('finish_list.html', holds=holds)
+
+@main.route('/tbuys')
+@login_required
+def tbuy():
+    day   = request.args.get('day')
+    celue = request.args.get('cl')
+    if day is not None and celue is not None:
+        filters = Tbuy.query.filter(Tbuy.day == day)
+        filters = filters.filter(Tbuy.strategyid == celue)
+    else:
+        filters = Tbuy.query.filter(Tbuy.day != '')
+
+    distdays = []
+    days = db.session.query(Tbuy.day).distinct().all()
+    for d in days:
+        distdays.append(d[0])
+    sortdays = sorted(distdays, key=lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'), reverse=True)
+
+    results = filters.join(Stock, Stock.stockid == Tbuy.stockid) \
+                .add_columns(Tbuy.id, Tbuy.stockid, Stock.stockname, Tbuy.strategyid \
+                , Tbuy.reason, Tbuy.blow, Tbuy.bhigh, Tbuy.day, Tbuy.act) \
+                .order_by(Tbuy.day.desc(), Tbuy.strategyid.asc(), Tbuy.id.asc()).all()
+    buys    = [
+                {
+                    'buy': item,
+                    'timestamp': None
+                }
+                for item in results
+              ]
+    return render_template('tbuy_list.html', buys=buys, sdays=sortdays)
 
 
 @main.route('/users/<username>')
@@ -98,6 +247,63 @@ def edit_profile():
     form.user_type.data = current_user.user_type_id
     return render_template('edit_profile.html', form=form)
 
+@main.route('/edit_stopwin/<int:id>', methods=['GET', 'POST'])
+def edit_stopwin(id):
+    hold  = Holds.query.get_or_404(id)
+    form = EditStopWinForm(user=user)
+    if form.validate_on_submit():
+        setattr(hold, 'sellday', form.sday.data)
+        setattr(hold, 'sprice', form.sprice.data)
+        setattr(hold, 'status', 3)
+        db.session.commit()
+        flash('The profile has been updated.', 'success')
+        return redirect(url_for('main.tholds'))
+    return render_template('edit_stopwin.html', form=form, user=user)
+
+@main.route('/edit_upholds/<int:id>', methods=['GET', 'POST'])
+def edit_upholds(id):
+    buy  = Tbuy.query.get_or_404(id)
+    buy.act = 1
+    db.session.commit()
+
+    form = EditHoldsForm(user=user)
+    if form.validate_on_submit():
+        f = Holds(
+                stockid    = buy.stockid,
+                strategyid = buy.strategyid,
+                reason     = buy.reason,
+                sellday    = '',
+                bprice     = form.price.data,
+                buyday     = form.bday.data,
+                oprice     = form.oprice.data,
+                nprice     = -1,
+                holds      = 0,
+                status     = 1,)
+        db.session.add(f)
+        flash('The profile has been updated.', 'success')
+        return redirect(url_for('main.tbuy'))
+    return render_template('edit_upholds.html', form=form, user=user)
+
+@main.route('/edit_updrops/<int:id>', methods=['GET', 'POST'])
+def edit_updrops(id):
+    buy = Tbuy.query.get_or_404(id)
+    buy.act = 1
+    db.session.commit()
+    form = EditDropsForm(user=user)
+    if form.validate_on_submit():
+        f = Holds(
+                stockid    = buy.stockid,
+                strategyid = buy.strategyid,
+                reason     = buy.reason,
+                dreason    = form.dreason.data,
+                sigday     = form.tday.data,
+                bprice     = form.oprice.data,
+                nprice     = -1,
+                status     = 2,)
+        db.session.add(f)
+        flash('The profile has been updated.', 'success')
+        return redirect(url_for('main.tbuy'))
+    return render_template('edit_updrops.html', form=form, user=user)
 
 @main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])
 @login_required

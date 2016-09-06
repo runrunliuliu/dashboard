@@ -1,9 +1,45 @@
 from flask_wtf import Form
 from wtforms import StringField, TextAreaField, BooleanField, SelectField, \
-    SubmitField, ValidationError
+    SubmitField, ValidationError, FloatField
 from wtforms.validators import Required, Length, Email, Regexp
 from ..models import Role, User, Geo, UserType
 
+class EditHoldsForm(Form):
+    price  = FloatField('Buy Price')
+    oprice = FloatField('Open Price')
+    bday   = StringField('Buy Day')
+    submit = SubmitField('Submit')
+
+    def __init__(self, *args, **kwargs):
+        super(EditHoldsForm, self).__init__(*args, **kwargs)
+        # set the choices for the role dropdown list
+        # give as a list of tuples, with each tuple consisting of two values:
+        # and identifier of the item and the text to show in the control
+        # self.geo.choices = [(geo.id, geo.geo_name)
+        #                      for geo in Geo.query.order_by(Geo.geo_name).all()]
+        # self.geo.choices.insert(0, (-1, ''))
+
+        # self.user_type.choices = \
+        #     [(utype.id, utype.name)
+        #      for utype in UserType.query.order_by(UserType.name).all()]
+        # self.user_type.choices.insert(0, (-1, ''))
+
+class EditDropsForm(Form):
+    dreason = StringField('Why NOT BUY?')
+    tday    = StringField('Signal Day')
+    oprice  = FloatField('Open Price')
+    submit  = SubmitField('Submit')
+
+    def __init__(self, *args, **kwargs):
+        super(EditDropsForm, self).__init__(*args, **kwargs)
+
+class EditStopWinForm(Form):
+    sprice  = FloatField('Sell Price')
+    sday    = StringField('Sell Day')
+    submit  = SubmitField('Submit')
+
+    def __init__(self, *args, **kwargs):
+        super(EditStopWinForm, self).__init__(*args, **kwargs)
 
 class EditProfileForm(Form):
     name = StringField('Real name', validators=[Length(0, 64)])
