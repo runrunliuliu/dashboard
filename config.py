@@ -113,5 +113,5 @@ config = {
     'development_psql': DevelopmentConfigPsql,
     'testing': TestingConfig,
     'production': ProductionConfig,
-    'default': DevelopmentConfigPsql
+    'default': DevelopmentConfigSqlite
 }

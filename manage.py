@@ -2,7 +2,7 @@
 import os
 from app import create_app, db
 from app.models import User, Role, Post, Follow, FirmType, FirmTier, Firm, \
-    Company, Relationship, Geo, UserType
+    Company, Relationship, Geo, UserType, Stock, Tbuy
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -116,19 +116,21 @@ def db_rebuild():
     User.generate_fake(60)
 
     # insert fake post data
-    Post.generate_fake(400)
+    Post.generate_fake(40)
 
     # insert fake followers
-    Follow.generate_fake(2000)
+    Follow.generate_fake(200)
 
     # insert fake firms
-    Firm.generate_fake(5000)
+    Firm.generate_fake(500)
 
     # insert fake companies
-    Company.generate_fake(10000)
+    Company.generate_fake(500)
 
     # insert fake relationships
-    Relationship.generate_fake(60000)
+    Relationship.generate_fake(1000)
+
+    Stock.generate_fake(1)
 
     # print results
     inspector = db.inspect(db.engine)
@@ -137,6 +139,18 @@ def db_rebuild():
     for table in inspector.get_table_names():
         print table
 
+@manager.command
+def db_import():
+    db.create_all()
+
+    Stock.generate_fake(1)
+
+    files = '/home/himalayas/apps/fortrade/kline-2.0.1/output/candle_pick/2016-09-05.qushi.csv'
+    Tbuy.generate_fake(files)
+    files = '/home/fengchao/apps/stgs/NEW/2016-09-05.csv'
+    Tbuy.generate_fake(files)
+    # files = '/home/himalayas/apps/opt/pytrade-3.0.1/data/triangle/test.txt'
+    # Tbuy.generate_fake(files)
 
 @manager.command
 def deploy():
