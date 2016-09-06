@@ -16,6 +16,21 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-users fa-lg"></i> Users
+                   <select id="CELUE" class="selectpicker" data-style="btn-primary">
+                    <option>选择策略</option>
+                        <option>candle</option>
+                        <option>qs</option>
+                        <option>NEW</option>
+                        <option>HOLD</option>
+                    </select>
+                    <script type="text/javascript">
+                         var cSelect=document.getElementById("CELUE");
+                         cSelect.onchange=function(){
+                             var celue=this.options[this.selectedIndex].innerHTML;
+                             var url = '/tholds' + '?' + 'cl=' + celue;
+                             window.location.href=url;
+                         }
+                    </script>
                 </div>
                 <div class="panel-body">
                     <div class="table-responsive">

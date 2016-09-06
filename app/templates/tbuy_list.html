@@ -17,15 +17,15 @@
                 <div class="panel-heading">
                     <select id="DAY" class="selectpicker" data-style="btn-primary">
                     <option>选择日期</option>
-                        <option>2016-08-22</option>
-                        <option>2016-08-23</option>
-                        <option>2016-08-24</option>
-                        <option>2016-08-25</option>
+                        {% for d in sdays %}
+                            <option>{{d}}</option>
+                        {% endfor %}
                     </select>
                    <select id="CELUE" class="selectpicker" data-style="btn-primary">
                     <option>选择策略</option>
                         <option>candle</option>
                         <option>qs</option>
+                        <option>NEW</option>
                     </select>
                     <script type="text/javascript">
                         var oSelect=document.getElementById("DAY");
