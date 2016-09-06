@@ -493,6 +493,87 @@ class FirmTier(db.Model):
         return '<FirmTier %r>' % self.firm_tier
 
 
+class Stock(db.Model):
+    __tablename__ = 'stocks'
+    id = db.Column(db.Integer, primary_key=True)
+    stockid   = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    stockname = db.Column(db.String(900))
+    hangye    = db.Column(db.String(900))
+
+    @staticmethod
+    def generate_fake(count=100):
+        from sqlalchemy.exc import IntegrityError
+
+        for line in open('/home/himalayas/apps/opt/pytrade-3.0.1/data/stockinfo.csv'):
+            arr = line.split(',')
+            f = Stock(stockid   = arr[1],
+                     stockname  = arr[2].decode('utf8'),
+                     hangye     = arr[3],)
+            db.session.add(f)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+    def __repr__(self):
+        return '<Stock {}>'.format(self.name)
+
+class Holds(db.Model):
+    __tablename__ = 'holds'
+    __table_args__ = (db.UniqueConstraint('stockid', 'buyday'), {})
+
+    id = db.Column(db.Integer, primary_key=True)
+    stockid    = db.Column(db.String(100), unique=False, nullable=True, index=True)
+    strategyid = db.Column(db.String(100))
+    reason     = db.Column(db.String(900))
+    buyday     = db.Column(db.String(100))
+    sigday     = db.Column(db.String(100))
+    sellday    = db.Column(db.String(100))
+    bprice     = db.Column(db.Float())
+    nprice     = db.Column(db.Float())
+    sprice     = db.Column(db.Float())
+    oprice     = db.Column(db.Float())
+    holds      = db.Column(db.Integer())
+    dreason    = db.Column(db.String(900))
+    # 1, HOLDS
+    # 2, DROPS
+    # 3. FINISH
+    status     = db.Column(db.Integer())
+
+class Tbuy(db.Model):
+    __tablename__ = 'tbuys'
+    __table_args__ = (db.UniqueConstraint('stockid', 'day'), {})
+    id = db.Column(db.Integer, primary_key=True)
+    stockid    = db.Column(db.String(100), nullable=False, index=True)
+    strategyid = db.Column(db.String(100))
+    reason     = db.Column(db.String(900))
+    day        = db.Column(db.String(100))
+    blow       = db.Column(db.Float())
+    bhigh      = db.Column(db.Float())
+    # 0, NO act
+    # 1, ACT DONE
+    act        = db.Column(db.Integer())
+
+    @staticmethod
+    def generate_fake(filename=''):
+        from sqlalchemy.exc import IntegrityError
+        for line in open(filename):
+            arr = line.split(',')
+            f = Tbuy(stockid     = arr[0],
+                      strategyid = arr[1],
+                      reason     = arr[2].decode('utf8'),
+                      day        = arr[3],
+                      blow       = arr[4],
+                      bhigh      = arr[5],
+                      act        = 0,)
+            db.session.add(f)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+
+    def __repr__(self):
+        return '<Tbuy {}>'.format(self.stockid)
+
 class Firm(db.Model):
     __tablename__ = 'firms'
     id = db.Column(db.Integer, primary_key=True)
